@@ -1,4 +1,6 @@
 import discord
+import config
+
 
 '''
 Simple bare-bones discord bot for further development.
@@ -27,4 +29,4 @@ async def on_message(message):
         await message.channel.send('until next time!')
 
 
-client.run('ODAwMDkzMzM4NTA1NzA3NTcw.YANG_A.26t_XApvJ-9kCndTIZPYSuW_LIY')
+client.run(config.KEY)
