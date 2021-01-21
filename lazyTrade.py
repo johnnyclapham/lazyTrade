@@ -103,7 +103,10 @@ def oldscrape(message,row_to_fetch):#old scraping function. kept for testing.
 @client.event
 async def on_ready():
     print('Bot with userid: {0.user} connected'.format(client))
-
+    try:
+        await client.change_presence(activity=discord.Streaming(name=config.RUNNER, url='https://finance.yahoo.com/quote/AAPL/key-statistics/'))
+    except:
+        await client.change_presence(activity=discord.Streaming(name=os.getenv('RUNNER'), url='https://finance.yahoo.com/quote/AAPL/key-statistics/'))
 
 @client.event
 async def on_message(message):
@@ -280,8 +283,12 @@ async def on_message(message):
 
 try:
     client.run(config.KEY)              #for local usage
+    #client.user.setActivity(config.RUNNER);
+    #client.user.setActivity('test');
+    #client.change_presence(activity=discord.Game(name="a game"))
 except:
     client.run(os.getenv('KEY'))        #for repl.it
+
 
 
 
