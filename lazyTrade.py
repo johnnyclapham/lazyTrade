@@ -4,15 +4,19 @@ import requests
 import json
 from bs4 import BeautifulSoup
 from datetime import datetime
+import os #for repl.it
 
 
 '''
-Simple bare-bones discord bot for further development.
+Simple discord bot for further development
+Deploys web-scraping to provide financial data
 Created for Python 3.7+
 @author johnnyclapham 2021
 '''
 
 client = discord.Client()
+
+
 
 def get_quote():
     #returns a random quote
@@ -75,10 +79,16 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    message.content=message.content.lower()
     if message.author == client.user:
         return
     elif message.content.startswith('hello'):
         await message.channel.send('Hello '+str(message.author)+'!'+' how are you?')
+    elif message.content.startswith('!host'):
+        try:
+            await message.channel.send('lazyTrade currently hosted by '+str(config.RUNNER))
+        except:
+            await message.channel.send('lazyTrade currently hosted by '+str(os.getenv('HOST')))
 
     elif message.content.startswith('good'):
         await message.channel.send('Really? That is excellent news.')
@@ -94,6 +104,11 @@ async def on_message(message):
         await message.channel.purge(limit=5)
         #await message.channel.send('Channel refreshed. All contents deleted. Type !help for options.')
         await message.channel.send('5 messages cleared.')
+
+    elif message.content.startswith('!refreshxlcrazy'):
+        await message.channel.purge(limit=1000)
+        #await message.channel.send('Channel refreshed. All contents deleted. Type !help for options.')
+        await message.channel.send('Channel refreshed.')
 
     #this is our stock price webscraper conditional
     elif message.content.startswith('!price'):
@@ -126,17 +141,24 @@ async def on_message(message):
     elif message.content.startswith('!breakdown'):
         #get ticker from message
         stock = message.content.split(' ')[1]
-        #call our cap webscraper function
-        stock_price = get_price(message)
-        market_cap = scrape(message,0)
-        ent_value = scrape(message,1)
-        trailpe = scrape(message,2)
-        forwardpe = scrape(message,3)
-        peg_stat = scrape(message,4)
-        psttm = scrape(message,5)
-        pbmrq = scrape(message,6)
-        entvalrev = scrape(message,7)
-        entvalebitda = scrape(message,8)
+
+        try:
+            #call our cap webscraper function
+            stock_price = get_price(message)
+            market_cap = scrape(message,0)
+            ent_value = scrape(message,1)
+            trailpe = scrape(message,2)
+            forwardpe = scrape(message,3)
+            peg_stat = scrape(message,4)
+            psttm = scrape(message,5)
+            pbmrq = scrape(message,6)
+            entvalrev = scrape(message,7)
+            entvalebitda = scrape(message,8)
+        except:
+            await message.channel.send(f"""Whoops! Something went wrong for ticker {stock.upper()}.""")
+            return
+
+
 
         #send the message to the channel
         await message.channel.send(f"""Statistics from finance.yahoo.com at {datetime.now()}
@@ -155,7 +177,7 @@ async def on_message(message):
 
     elif message.content.startswith('!help'):
         help_list = """
-        List of commands:
+        ```List of commands:
             hello
             good
             bye
@@ -164,13 +186,14 @@ async def on_message(message):
             !price <<ticker>>
             !peg <<ticker>>
             !breakdown <<ticker>>
-            """
+            ```"""
 
         await message.channel.send(help_list)
 
-
-client.run(config.KEY)
-
+try:
+    client.run(config.KEY)              #for local usage
+except:
+    client.run(os.getenv('KEY'))        #for repl.it
 
 
 ################BELOW FUNCTIONS CURRENTLY NOT IN USE#######################
